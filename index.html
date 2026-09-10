@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101d2b" />
+    <meta name="description" content="ライブ会場から乗りたい列車まで、座席を離れる推奨時刻を逆算する検証用MVP" />
+    <title>あと、何分観られる？</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true">↗</div>
+        <div>
+          <p class="eyebrow">LIVE EXIT PLANNER · 検証版</p>
+          <h1>あと、何分観られる？</h1>
+        </div>
+      </header>
+
+      <ol class="steps" aria-label="入力の進み具合">
+        <li class="active" data-step-dot="1"><span>1</span>公演</li>
+        <li data-step-dot="2"><span>2</span>帰り</li>
+        <li data-step-dot="3"><span>3</span>判定</li>
+        <li data-step-dot="4"><span>4</span>詳細</li>
+      </ol>
+
+      <section class="panel active" data-screen="1">
+        <div class="section-heading">
+          <p class="kicker">STEP 1</p>
+          <h2>今日の公演を教えてください</h2>
+          <p>対応会場を絞り、終演後の導線を会場別に計算します。</p>
+        </div>
+        <form id="event-form" class="form-grid">
+          <label>
+            <span>会場</span>
+            <select id="venue" required></select>
+          </label>
+          <div class="two-column">
+            <label>
+              <span>公演日</span>
+              <input id="event-date" type="date" required />
+            </label>
+            <label>
+              <span>終演予定</span>
+              <input id="end-at" type="time" value="21:00" required />
+            </label>
+          </div>
+          <label>
+            <span>混雑見込み</span>
+            <select id="crowd">
+              <option value="unknown">わからない（安全側で計算）</option>
+              <option value="near_capacity">満員に近い</option>
+              <option value="normal">通常</option>
+            </select>
+          </label>
+          <aside class="notice">
+            <strong>終演予定は遅れることがあります</strong>
+            <p>入力した時刻どおりに終わる前提で計算します。自動更新はまだありません。</p>
+          </aside>
+          <button class="primary" type="submit">帰りの列車を設定 <span>→</span></button>
+        </form>
+      </section>
+
+      <section class="panel" data-screen="2">
+        <button class="back" data-back="1">← 公演に戻る</button>
+        <div class="section-heading">
+          <p class="kicker">STEP 2</p>
+          <h2>乗りたい列車を決めます</h2>
+          <p>列車は普段使っている乗換案内で確認し、発車駅と時刻を入力してください。</p>
+        </div>
+        <form id="travel-form" class="form-grid">
+          <label>
+            <span>席の大まかな位置</span>
+            <select id="seat-zone">
+              <option value="unknown">わからない</option>
+              <option value="front">前方・アリーナ前方</option>
+              <option value="middle">中央</option>
+              <option value="rear_upper">後方・上層</option>
+            </select>
+          </label>
+          <div class="two-column">
+            <label>
+              <span>歩く速さ</span>
+              <select id="walking">
+                <option value="normal">ふつう</option>
+                <option value="slow">ゆっくり</option>
+                <option value="fast">速め</option>
+              </select>
+            </label>
+            <label>
+              <span>大きな荷物</span>
+              <select id="luggage">
+                <option value="false">なし</option>
+                <option value="true">あり</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            <span>乗車駅</span>
+            <select id="station" required></select>
+          </label>
+          <div class="two-column">
+            <label>
+              <span>発車日</span>
+              <select id="departure-day">
+                <option value="same">公演当日</option>
+                <option value="next">翌日</option>
+              </select>
+            </label>
+            <label>
+              <span>発車時刻</span>
+              <input id="departure-at" type="time" value="22:15" required />
+            </label>
+          </div>
+          <label>
+            <span>列車の種類</span>
+            <select id="train-type">
+              <option value="shinkansen">新幹線</option>
+              <option value="limited_express">在来線・特急</option>
+              <option value="local_last_train">終電</option>
+            </select>
+          </label>
+          <p class="error" id="form-error" role="alert"></p>
+          <button class="primary" type="submit">安全度を確認 <span>→</span></button>
+        </form>
+      </section>
+
+      <section class="panel" data-screen="3">
+        <button class="back" data-back="2">← 条件を直す</button>
+        <div id="free-result"></div>
+      </section>
+
+      <section class="panel" data-screen="4">
+        <button class="back" data-back="3">← 簡易判定に戻る</button>
+        <div id="detail-result"></div>
+      </section>
+      <footer class="footer"><a href="privacy.html">プライバシーとデータの扱い</a><span>検証版 0.1.0</span></footer>
+    </main>
+
+    <dialog id="unlock-dialog">
+      <div class="dialog-body">
+        <p class="kicker">PRICE TEST</p>
+        <h2>料金は発生しません</h2>
+        <p>これは詳細プランにいくらなら反応するかを確かめる検証です。今回、決済や請求は一切ありません。</p>
+        <div class="dialog-actions">
+          <button class="secondary" id="cancel-unlock">戻る</button>
+          <button class="primary" id="confirm-unlock">無料で詳細を見る</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+    </script>
+  </body>
+</html>
