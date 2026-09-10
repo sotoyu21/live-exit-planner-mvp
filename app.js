@@ -17,7 +17,7 @@ function track(name, properties = {}) {
 function downloadValidationData() {
   const payload = {
     exportedAt: new Date().toISOString(),
-    appVersion: "0.1.0",
+    appVersion: "0.2.0",
     events: JSON.parse(localStorage.getItem("mvp-events") || "[]"),
     outcomes: JSON.parse(localStorage.getItem("mvp-outcomes") || "[]")
   };
