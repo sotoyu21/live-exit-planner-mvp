@@ -99,11 +99,12 @@ function renderFree(result) {
         <h3>何時に席を離れるか、内訳まで確認</h3>
         <ul><li>推奨退出開始時刻</li><li>会場・屋外・駅構内の時間</li><li>不確実性と確認事項</li></ul>
       </div>
-      <button class="purchase" id="unlock">詳細な退出プランを見る <strong>¥${price}</strong></button>
+      <button class="purchase" id="unlock" ${paymentConfig.mode === "disabled" ? "disabled" : ""}>${paymentConfig.mode === "disabled" ? "詳細プランの販売は準備中です" : `詳細な退出プランを見る <strong>¥${price}</strong>`}</button>
     </article>
     <p class="fine-print">列車時刻と運行状況は乗換案内で確認してください。この検証版は乗車を保証しません。</p>
   `;
   $("#unlock").addEventListener("click", () => {
+    if (paymentConfig.mode === "disabled") return;
     track("detail_unlock_clicked", { price, venueId: result.venue.id, safety: result.safety, mode: paymentConfig.mode });
     localStorage.setItem("mvp-pending-plan", JSON.stringify(result.input));
     if (paymentConfig.mode === "live") {
@@ -215,6 +216,7 @@ $("#travel-form").addEventListener("submit", (event) => {
 document.querySelectorAll("[data-back]").forEach((button) => button.addEventListener("click", () => showScreen(Number(button.dataset.back))));
 $("#cancel-unlock").addEventListener("click", () => $("#unlock-dialog").close());
 $("#confirm-unlock").addEventListener("click", () => {
+  if (paymentConfig.mode === "disabled") return;
   if (paymentConfig.mode === "live") {
     if (!paymentConfig.paymentUrl) {
       $("#unlock-dialog").querySelector(".dialog-body > p:not(.kicker)").textContent = "決済リンクは準備中です。公開前に設定してください。";

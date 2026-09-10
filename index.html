@@ -7,14 +7,14 @@
     <meta name="description" content="ライブ会場から乗りたい列車まで、座席を離れる推奨時刻を逆算する検証用MVP" />
     <title>あと、何分観られる？</title>
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=0.2.1" />
   </head>
   <body>
     <main class="app-shell">
       <header class="topbar">
         <div class="brand-mark" aria-hidden="true">↗</div>
         <div>
-          <p class="eyebrow">LIVE EXIT PLANNER · 有料ベータ版</p>
+          <p class="eyebrow">LIVE EXIT PLANNER · 販売準備中</p>
           <h1>あと、何分観られる？</h1>
         </div>
       </header>
@@ -155,9 +155,13 @@
       </div>
     </dialog>
 
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=0.3.0"></script>
     <script>
-      if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => navigator.serviceWorker
+          .register("./service-worker.js", { updateViaCache: "none" })
+          .then((registration) => registration.update()));
+      }
     </script>
   </body>
 </html>
