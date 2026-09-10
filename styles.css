@@ -46,6 +46,7 @@ input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px #1b
 .secondary { background: #e7e5de; color: var(--ink); }
 .wide { width: 100%; margin-top: 20px; }
 .text-button { border: 0; padding: 12px; background: transparent; color: var(--teal); font-weight: 900; }
+.link-button { display: flex; align-items: center; justify-content: center; width: 100%; margin-top: 18px; text-decoration: none; }
 .back { border: 0; padding: 0; margin: 0 0 24px; background: transparent; color: var(--teal); font-weight: 800; }
 .notice { border-left: 4px solid var(--amber); border-radius: 4px 14px 14px 4px; padding: 15px 16px; background: #fff9e9; }
 .notice p { margin: 5px 0 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
@@ -96,6 +97,8 @@ dialog::backdrop { background: #10212ea8; backdrop-filter: blur(4px); }
 .dialog-body { padding: 26px; }
 .dialog-body h2 { font-size: 30px; margin-bottom: 10px; }
 .dialog-body > p:not(.kicker) { color: var(--muted); line-height: 1.65; }
+.dialog-body .checkout-terms { font-size: 12px; }
+.dialog-body .checkout-terms a, .legal a { color: var(--teal); font-weight: 800; }
 .dialog-actions { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-top: 22px; }
 .dialog-actions .primary { justify-content: center; }
 .footer { display: flex; justify-content: space-between; gap: 16px; margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
@@ -103,6 +106,10 @@ dialog::backdrop { background: #10212ea8; backdrop-filter: blur(4px); }
 .legal { line-height: 1.75; }
 .legal h2 { margin-top: 32px; font-size: 20px; }
 .legal ul { padding-left: 22px; }
+.legal-table { width: 100%; border-collapse: collapse; margin-top: 18px; background: var(--card); }
+.legal-table th, .legal-table td { padding: 12px; border: 1px solid var(--line); vertical-align: top; text-align: left; }
+.legal-table th { width: 32%; font-size: 12px; }
+.legal-table td { font-size: 13px; }
 
 @media (max-width: 430px) {
   .app-shell { padding-inline: 16px; }

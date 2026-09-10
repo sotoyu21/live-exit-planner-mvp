@@ -1,9 +1,11 @@
 import { dataSources, venues } from "./data.js";
 import { calculatePlan, formatTime, safetyCopy } from "./engine.js";
+import { paymentConfig } from "./payment-config.js";
 
 const state = { screen: 1, result: null };
 const $ = (selector) => document.querySelector(selector);
-const price = Number(localStorage.getItem("mvp-price")) || [100, 200, 300][Math.floor(Math.random() * 3)];
+const assignedTestPrice = Number(localStorage.getItem("mvp-price")) || [100, 200, 300][Math.floor(Math.random() * 3)];
+const price = paymentConfig.mode === "live" ? paymentConfig.livePrice : assignedTestPrice;
 localStorage.setItem("mvp-price", String(price));
 
 function track(name, properties = {}) {
@@ -102,7 +104,14 @@ function renderFree(result) {
     <p class="fine-print">列車時刻と運行状況は乗換案内で確認してください。この検証版は乗車を保証しません。</p>
   `;
   $("#unlock").addEventListener("click", () => {
-    track("detail_unlock_clicked", { price, venueId: result.venue.id, safety: result.safety });
+    track("detail_unlock_clicked", { price, venueId: result.venue.id, safety: result.safety, mode: paymentConfig.mode });
+    localStorage.setItem("mvp-pending-plan", JSON.stringify(result.input));
+    if (paymentConfig.mode === "live") {
+      $("#unlock-dialog").querySelector(".kicker").textContent = "PAID BETA";
+      $("#unlock-dialog").querySelector("h2").textContent = `詳細プラン ¥${price}`;
+      $("#unlock-dialog").querySelector(".dialog-body > p:not(.kicker)").textContent = "次にStripeの決済ページへ移動します。現在の結果は実測前の参考値で、乗車を保証しません。";
+      $("#confirm-unlock").textContent = `Stripeで支払う ¥${price}`;
+    }
     $("#unlock-dialog").showModal();
   });
   track("result_viewed", { venueId: result.venue.id, safety: result.safety, quality: result.quality });
@@ -206,6 +215,15 @@ $("#travel-form").addEventListener("submit", (event) => {
 document.querySelectorAll("[data-back]").forEach((button) => button.addEventListener("click", () => showScreen(Number(button.dataset.back))));
 $("#cancel-unlock").addEventListener("click", () => $("#unlock-dialog").close());
 $("#confirm-unlock").addEventListener("click", () => {
+  if (paymentConfig.mode === "live") {
+    if (!paymentConfig.paymentUrl) {
+      $("#unlock-dialog").querySelector(".dialog-body > p:not(.kicker)").textContent = "決済リンクは準備中です。公開前に設定してください。";
+      return;
+    }
+    track("checkout_started", { price, venueId: state.result.venue.id });
+    window.location.assign(paymentConfig.paymentUrl);
+    return;
+  }
   $("#unlock-dialog").close();
   track("detail_unlocked", { price, venueId: state.result.venue.id });
   renderDetail(state.result);
