@@ -1,4 +1,4 @@
-const CACHE = "live-exit-mvp-v7";
+const CACHE = "live-exit-mvp-v8";
 const ASSETS = ["./", "./index.html", "./privacy.html", "./commerce.html", "./success.html", "./success.js", "./styles.css", "./app.js", "./engine.js", "./data.js", "./payment-config.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
