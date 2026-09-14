@@ -1,4 +1,5 @@
 import { venues } from './data.js';
+import { validatePreviewInput, sameDayCandidates } from './preview-input.js';
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const minute = (s) => Number(s.slice(0,2))*60+Number(s.slice(3));
@@ -11,11 +12,15 @@ stationOptions(); $('#venue').onchange=stationOptions;
 $('#timing').onchange=()=>{const mode=$('#timing').value; $('#time-row').hidden=mode==='after'; $('#time').required=mode!=='after'; $('#station-row').hidden=mode!=='departure'; $('#reserved-station').required=mode==='departure'; $('#time-label').textContent=mode==='arrival'?'到着したい時刻（公演当日）':'予約済み列車の発車時刻（公演当日）';};
 function screen(name){for(const s of ['search','results','detail'])$(`#${s}-screen`).hidden=s!==name; window.scrollTo(0,0);}
 $('#edit').onclick=()=>screen('search'); $('#back-results').onclick=()=>screen('results');
-$('#route-form').onsubmit=(e)=>{e.preventDefault(); $('#error').textContent=''; const destination=$('#destination').value.trim(); if(!destination){$('#error').textContent='到着地を入力してください';return;}
+$('#route-form').onsubmit=(e)=>{e.preventDefault(); $('#error').textContent=''; let destination;
+try { destination=validatePreviewInput({date:$('#date').value,end:$('#end').value,mode:$('#timing').value,time:$('#time').value,destination:$('#destination').value,station:$('#reserved-station').value}); }
+catch(error){ $('#error').textContent=error.message; return; }
 input={venue:venues.find(v=>v.id===$('#venue').value),destination,end:minute($('#end').value),mode:$('#timing').value,time:minute($('#time').value),walking:$('#walking').value,seat:$('#seat').value,luggage:$('#luggage').value};
 // Deliberately synthetic UI fixtures. Never treat these as a route provider.
 const access=45+(input.walking==='slow'?15:0)+(input.seat==='rear_upper'?10:0)+(input.luggage==='yes'?5:0);
 candidates=[{id:0,label:'サンプルA · 到着を優先',duration:90,fare:6800,transfers:1,offset:0},{id:1,label:'サンプルB · 観覧時間を優先',duration:120,fare:5200,transfers:2,offset:25},{id:2,label:'サンプルC · 費用を優先',duration:160,fare:2400,transfers:2,offset:45}].map(c=>{const depart=input.mode==='arrival'?input.time-c.duration:input.mode==='departure'?input.time:input.end+access+c.offset;return {...c,depart,arrival:depart+c.duration,exit:depart-access,access,station:input.mode==='departure'?$('#reserved-station').value:input.venue.stationProfiles[c.id%input.venue.stationProfiles.length].name};});
+candidates=sameDayCandidates(candidates);
+$('#result-note').textContent=candidates.length ? `${$('#date').value} の架空の${candidates.length}候補です。実際の便の有無・運賃・乗車可否は確認していません。` : 'この条件で表示できる当日出発のサンプルはありません。実際の列車がないという意味ではありません。条件を変更してください。';
 render(); screen('results');};
 $('#sort').onchange=render;
 function render(){const key=$('#sort').value;const sorted=[...candidates].sort((a,b)=>key==='price'?a.fare-b.fare:key==='arrival'?a.arrival-b.arrival:b.exit-a.exit); $('#results-title').textContent=`${input.venue.name} → ${input.destination}`;
