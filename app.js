@@ -2,6 +2,7 @@ import { dataSources, venues } from "./data.js";
 import { calculatePlan, formatTime, safetyCopy } from "./engine.js";
 import { paymentConfig } from "./payment-config.js";
 import { calculateManualPlan, walkingStations } from './manual-plan.js';
+import { googleTransitUrl } from './external-route.js';
 
 const state = { screen: 1, result: null };
 const $ = (selector) => document.querySelector(selector);
@@ -67,8 +68,7 @@ function collectInput() {
     stationId: $("#station").value,
     departureDay: $("#departure-day").value,
     departureAt: $("#departure-at").value,
-    trainType: 'local_last_train',
-    timetableConfirmed: $('#timetable-confirmed').checked
+    trainType: 'local_last_train'
   };
 }
 
@@ -235,3 +235,11 @@ $("#confirm-unlock").addEventListener("click", () => {
 });
 
 populateVenues();
+
+$('#external-route').addEventListener('click', (event) => {
+  try {
+    const venue = venues.find(v => v.id === $('#venue').value);
+    event.currentTarget.href = googleTransitUrl(`${venue.name} ${venue.city} 日本`, $('#destination').value);
+    $('#external-error').textContent = '';
+  } catch (error) { event.preventDefault(); $('#external-error').textContent = error.message; $('#destination').focus(); }
+});

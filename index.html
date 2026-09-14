@@ -72,6 +72,13 @@
           <p>列車は普段使っている乗換案内で確認し、発車駅と時刻を入力してください。</p>
         </div>
         <form id="travel-form" class="form-grid">
+          <section class="notice">
+            <h3>帰りの経路をGoogle マップで探す</h3>
+            <label>到着地・帰りたい駅<input id="destination" type="text" maxlength="160" placeholder="例：名古屋駅" /></label>
+            <a id="external-route" class="secondary link-button" href="https://www.google.com/maps/dir/" target="_blank" rel="noopener noreferrer">会場→到着地の公共交通ルートを開く ↗</a>
+            <p id="external-error" role="alert"></p>
+            <p>会場と到着地をGoogleへ渡して検索します。日時は引き継がれません。移動先で公演日・希望時刻を設定し、徒歩で向かう最初の駅と発車時刻を確認して、この画面へ戻って入力してください。経路や時刻は自動で取り込まれません。</p>
+          </section>
           <label>
             <span>席の大まかな位置</span>
             <select id="seat-zone">
@@ -115,10 +122,6 @@
               <input id="departure-at" type="time" value="22:15" required />
             </label>
           </div>
-          <label>
-            <input id="timetable-confirmed" type="checkbox" required />
-            <span>利用日・この駅を出発する列車の時刻を、外部の乗換案内で確認しました</span>
-          </label>
           <p class="notice">列車は検索しません。到着地までの経路は外部の乗換案内で確認し、最初に徒歩で向かう駅の発車時刻を入力してください。新横浜・東京・新大阪への電車移動や、その先の接続は計算対象外です。退出時間も実測前の試験値です。</p>
           <p class="error" id="form-error" role="alert"></p>
           <button class="primary" type="submit">安全度を確認 <span>→</span></button>
@@ -153,7 +156,7 @@
       </div>
     </dialog>
 
-    <script type="module" src="app.js?v=0.4.0"></script>
+    <script type="module" src="app.js?v=0.4.1"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => navigator.serviceWorker
