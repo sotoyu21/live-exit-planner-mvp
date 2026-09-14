@@ -3,6 +3,7 @@ import { calculatePlan, formatTime, safetyCopy } from "./engine.js";
 import { paymentConfig } from "./payment-config.js";
 import { calculateManualPlan, walkingStations } from './manual-plan.js';
 import { googleTransitUrl } from './external-route.js';
+import { draftFields, saveDraft, readDraft } from './draft.js';
 
 const state = { screen: 1, result: null };
 const $ = (selector) => document.querySelector(selector);
@@ -236,10 +237,28 @@ $("#confirm-unlock").addEventListener("click", () => {
 
 populateVenues();
 
+let draftStorage;
+try { draftStorage=window.sessionStorage; } catch { /* Draft is optional. */ }
+const draft=readDraft(draftStorage);
+if(draft) {
+  for(const id of draftFields) {
+    const field=$(`#${id}`), value=draft[id];
+    if(value === undefined || !field) continue;
+    if(field.tagName === 'SELECT' && ![...field.options].some(o=>o.value===value)) continue;
+    field.value=value;
+    if(id==='venue') populateStations();
+  }
+}
+function keepDraft() {
+  saveDraft(draftStorage,Object.fromEntries(draftFields.map(id=>[id,$(`#${id}`).value])));
+}
+for(const id of draftFields) $(`#${id}`).addEventListener('input',keepDraft);
+
 $('#external-route').addEventListener('click', (event) => {
   try {
     const venue = venues.find(v => v.id === $('#venue').value);
     event.currentTarget.href = googleTransitUrl(`${venue.name} ${venue.city} 日本`, $('#destination').value);
+    keepDraft();
     $('#external-error').textContent = '';
   } catch (error) { event.preventDefault(); $('#external-error').textContent = error.message; $('#destination').focus(); }
 });
