@@ -1,12 +1,10 @@
 import { boardingBuffers, exitProfiles, venues } from "./data.js";
+import { parseJapanTime } from "./route-contract.js";
 
 const MINUTE = 60_000;
 
 function localDateTime(date, time, nextDay = false) {
-  const value = new Date(`${date}T${time}:00`);
-  if (Number.isNaN(value.getTime())) throw new Error("日時を正しく入力してください");
-  if (nextDay) value.setDate(value.getDate() + 1);
-  return value;
+  return new Date(parseJapanTime(`${date}T${time}:00+09:00`) + (nextDay ? 86400000 : 0));
 }
 
 function addMinutes(profile, amount) {
@@ -29,11 +27,14 @@ export function formatTime(value) {
   return new Intl.DateTimeFormat("ja-JP", {
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false
+    hour12: false,
+    timeZone: "Asia/Tokyo"
   }).format(value);
 }
 
 export function calculatePlan(input, now = new Date()) {
+  if (!input || !['normal', 'near_capacity', 'unknown'].includes(input.crowd) || !['normal', 'slow', 'fast'].includes(input.walking) || !['same', 'next'].includes(input.departureDay) || typeof input.bulkyLuggage !== 'boolean') throw new Error("混雑・歩き方・荷物・発車日を正しく選択してください");
+  if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new Error("計算日時が不正です");
   const venue = venues.find((item) => item.id === input.venueId);
   if (!venue) throw new Error("未対応の会場です");
   const station = venue.stationProfiles.find((item) => item.id === input.stationId);
@@ -54,8 +55,8 @@ export function calculatePlan(input, now = new Date()) {
   if (departureAt.getTime() - endAt.getTime() > 8 * 60 * MINUTE) {
     throw new Error("MVPでは終演後8時間以内の列車だけ判定できます");
   }
-  const profileExpiry = new Date(`${venue.expiresAt}T23:59:59`);
-  const expired = now > profileExpiry;
+  const profileExpiry = new Date(localDateTime(venue.expiresAt, '00:00').getTime() + 86400000 - 1);
+  const expired = now > profileExpiry || departureAt > profileExpiry;
 
   let exit = { ...exitBase };
   let outdoor = { ...station.outdoorMinutes };
@@ -93,7 +94,8 @@ export function calculatePlan(input, now = new Date()) {
   else if (margin >= -20) safety = "tight";
   else safety = "difficult";
 
-  if (expired) warnings.push("会場データの有効期限が切れています");
+  if (expired) warnings.push("会場データの有効期限が切れているか、利用日が有効期限を超えています");
+  if (recommendedExitAt < endAt) warnings.push("終演前退出の専用実測はありません。終演後の試験値を使用しており、早く出れば混雑が減るとは仮定していません");
   if (station.quality === "C") warnings.push("実測前の試験値のため、安心判定は表示していません");
   warnings.push("列車時刻・運行状況・当日の公式退場案内を別途確認してください");
 

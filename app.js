@@ -90,7 +90,7 @@ function renderFree(result) {
     </div>
     <article class="summary-card">
       <p class="eyebrow">保守的な余裕</p>
-      <h3>${marginText(result.marginIfStayUntilEnd)}</h3>
+      <h3>${result.safety === 'insufficient_data' ? '実測不足のため、間に合うかは判定できません' : marginText(result.marginIfStayUntilEnd)}</h3>
       <p>移動時間の試験範囲: ${result.totals.low}〜${result.totals.conservative}分</p>
     </article>
     <article class="paywall-card">

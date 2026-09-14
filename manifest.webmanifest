@@ -1,6 +1,6 @@
 {
-  "name": "あと、何分観られる？",
-  "short_name": "退出プラン",
+  "name": "ヨインミチ｜ライブ帰宅プランナー",
+  "short_name": "ヨインミチ",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f2eb",
