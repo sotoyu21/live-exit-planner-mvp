@@ -99,7 +99,7 @@
             </label>
           </div>
           <label>
-            <span>乗車駅</span>
+            <span>会場から徒歩で向かう乗車駅</span>
             <select id="station" required></select>
           </label>
           <div class="two-column">
@@ -116,13 +116,10 @@
             </label>
           </div>
           <label>
-            <span>列車の種類</span>
-            <select id="train-type">
-              <option value="shinkansen">新幹線</option>
-              <option value="limited_express">在来線・特急</option>
-              <option value="local_last_train">終電</option>
-            </select>
+            <input id="timetable-confirmed" type="checkbox" required />
+            <span>利用日・この駅を出発する列車の時刻を、外部の乗換案内で確認しました</span>
           </label>
+          <p class="notice">列車は検索しません。到着地までの経路は外部の乗換案内で確認し、最初に徒歩で向かう駅の発車時刻を入力してください。新横浜・東京・新大阪への電車移動や、その先の接続は計算対象外です。退出時間も実測前の試験値です。</p>
           <p class="error" id="form-error" role="alert"></p>
           <button class="primary" type="submit">安全度を確認 <span>→</span></button>
         </form>
@@ -156,7 +153,7 @@
       </div>
     </dialog>
 
-    <script type="module" src="app.js?v=0.3.1"></script>
+    <script type="module" src="app.js?v=0.4.0"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => navigator.serviceWorker

@@ -1,6 +1,7 @@
 import { dataSources, venues } from "./data.js";
 import { calculatePlan, formatTime, safetyCopy } from "./engine.js";
 import { paymentConfig } from "./payment-config.js";
+import { calculateManualPlan, walkingStations } from './manual-plan.js';
 
 const state = { screen: 1, result: null };
 const $ = (selector) => document.querySelector(selector);
@@ -51,7 +52,7 @@ function populateVenues() {
 
 function populateStations() {
   const venue = venues.find((item) => item.id === $("#venue").value) || venues[0];
-  $("#station").innerHTML = venue.stationProfiles.map((station) => `<option value="${station.id}">${station.name}</option>`).join("");
+  $("#station").innerHTML = venue.stationProfiles.filter(station => walkingStations[venue.id].includes(station.id)).map((station) => `<option value="${station.id}">${station.name}</option>`).join("");
 }
 
 function collectInput() {
@@ -66,7 +67,8 @@ function collectInput() {
     stationId: $("#station").value,
     departureDay: $("#departure-day").value,
     departureAt: $("#departure-at").value,
-    trainType: $("#train-type").value
+    trainType: 'local_last_train',
+    timetableConfirmed: $('#timetable-confirmed').checked
   };
 }
 
@@ -99,12 +101,12 @@ function renderFree(result) {
         <h3>何時に席を離れるか、内訳まで確認</h3>
         <ul><li>推奨退出開始時刻</li><li>会場・屋外・駅構内の時間</li><li>不確実性と確認事項</li></ul>
       </div>
-      <button class="purchase" id="unlock" ${paymentConfig.mode === "disabled" ? "disabled" : ""}>${paymentConfig.mode === "disabled" ? "詳細プランの販売は準備中です" : `詳細な退出プランを見る <strong>¥${price}</strong>`}</button>
+      <button class="purchase" id="unlock">無料で試験計算の内訳を見る</button>
     </article>
     <p class="fine-print">列車時刻と運行状況は乗換案内で確認してください。この検証版は乗車を保証しません。</p>
   `;
   $("#unlock").addEventListener("click", () => {
-    if (paymentConfig.mode === "disabled") return;
+    if (paymentConfig.mode === "disabled") { renderDetail(result); showScreen(4); return; }
     track("detail_unlock_clicked", { price, venueId: result.venue.id, safety: result.safety, mode: paymentConfig.mode });
     localStorage.setItem("mvp-pending-plan", JSON.stringify(result.input));
     if (paymentConfig.mode === "live") {
@@ -206,7 +208,7 @@ $("#travel-form").addEventListener("submit", (event) => {
   event.preventDefault();
   try {
     $("#form-error").textContent = "";
-    state.result = calculatePlan(collectInput());
+    state.result = calculateManualPlan(collectInput());
     renderFree(state.result);
     showScreen(3);
   } catch (error) {

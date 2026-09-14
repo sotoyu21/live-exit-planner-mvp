@@ -1,5 +1,5 @@
-const CACHE = "live-exit-mvp-v9";
-const ENGINE_DEPENDENCIES = ["./route-contract.js"];
+const CACHE = "live-exit-mvp-v10";
+const ENGINE_DEPENDENCIES = ["./route-contract.js", "./manual-plan.js"];
 const ASSETS = ["./", "./index.html", "./privacy.html", "./commerce.html", "./success.html", "./success.js", "./styles.css", "./app.js", "./engine.js", "./data.js", "./payment-config.js", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
