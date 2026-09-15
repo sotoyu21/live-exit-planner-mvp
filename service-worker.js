@@ -1,4 +1,4 @@
-const CACHE = "live-exit-mvp-v12";
+const CACHE = "live-exit-mvp-v13";
 const ENGINE_DEPENDENCIES = ["./route-contract.js", "./manual-plan.js", "./external-route.js", "./draft.js"];
 const ASSETS = ["./", "./index.html", "./privacy.html", "./commerce.html", "./success.html", "./success.js", "./styles.css", "./app.js", "./engine.js", "./data.js", "./payment-config.js", "./manifest.webmanifest", "./icon.svg"];
 

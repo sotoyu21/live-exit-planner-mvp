@@ -2,7 +2,7 @@ import { dataSources, venues } from "./data.js";
 import { calculatePlan, formatTime, safetyCopy } from "./engine.js";
 import { paymentConfig } from "./payment-config.js";
 import { calculateManualPlan, walkingStations } from './manual-plan.js';
-import { googleTransitUrl } from './external-route.js';
+import { googleTransitUrl, googleWalkingUrl } from './external-route.js';
 import { draftFields, saveDraft, readDraft } from './draft.js';
 
 const state = { screen: 1, result: null };
@@ -128,15 +128,22 @@ function renderDetail(result) {
   $("#detail-result").innerHTML = `
     <div class="detail-hero">
       <p class="kicker">${result.station.name} ${formatTime(result.departureAt)}発に乗るための参考計算</p>
-      <h2><span>${formatTime(result.recommendedExitAt)}</span>までに<br />座席を離れて退出を始める</h2>
+      <p>未実測の仮定を使った計算例・行動を推奨する時刻ではありません</p>
+      <h2>座席を離れる時刻の計算例<br /><span>${formatTime(result.recommendedExitAt)}</span></h2>
       <div class="badge-row"><span class="status tone-${copy.tone}">${copy.label}</span><span class="quality">データ品質 ${result.quality}</span></div>
     </div>
     <aside class="notice strong">
       <strong>現在は実測前の試験値です</strong>
-      <p>この時刻を「間に合う保証」として使わないでください。実測を集めるための参考計算です。</p>
+      <p>表示は会場出口に着く時刻ではなく、座席を離れる時刻の計算例です。列車に間に合うかは判定できません。公式案内とご自身の判断で行動してください。</p>
+      <p>ロッカーへの寄り道・荷物回収・買い物・トイレ・休憩は内訳に含まれていません。</p>
     </aside>
+    <section class="check-card">
+      <h3>会場から乗車駅までの道を確認</h3>
+      <a id="detail-map" class="secondary link-button" target="_blank" rel="noopener noreferrer">Google マップで徒歩ルートを開く ↗</a>
+      <p>Googleが検索する一般の徒歩ルートです。会場の指定退場ルート・当日の規制・混雑を反映した案内ではありません。現地の係員の案内を優先してください。</p>
+    </section>
     <section class="timeline-card">
-      <div class="timeline-head"><div><p class="eyebrow">時間の内訳</p><h3>合計 ${result.totals.conservative}分を確保</h3></div><span>保守的</span></div>
+      <div class="timeline-head"><div><p class="eyebrow">未実測の仮定による内訳</p><h3>合計 ${result.totals.conservative}分で試算</h3></div><span>試験値</span></div>
       ${result.segments.map((segment) => `
         <div class="segment">
           <div class="segment-copy"><strong>${segment.label}</strong><small>想定 ${segment.low}〜${segment.conservative}分</small></div>
@@ -173,6 +180,7 @@ function renderDetail(result) {
     <button class="text-button wide" id="export-data">検証データをファイルに出力</button>
     <p class="fine-print">保存内容はこの端末内だけに保存されます。</p>
   `;
+  $('#detail-map').href = googleWalkingUrl(`${result.venue.name} ${result.venue.city} 日本`, `${result.station.name} ${result.venue.city} 日本`);
   $("#save-plan").addEventListener("click", () => {
     localStorage.setItem("mvp-saved-plan", JSON.stringify({ input: result.input, result }));
     track("plan_saved", { venueId: result.venue.id, safety: result.safety });

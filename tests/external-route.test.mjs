@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { googleTransitUrl } from '../external-route.js';
+import { googleTransitUrl, googleWalkingUrl } from '../external-route.js';
+test('detail route uses walking rather than transit',()=>{
+ const url=new URL(googleWalkingUrl('Kアリーナ横浜','横浜駅'));
+ assert.equal(url.searchParams.get('travelmode'),'walking');
+ assert.equal(url.searchParams.get('destination'),'横浜駅');
+});
 test('external route carries venue, destination and transit mode',()=>{
  const url=new URL(googleTransitUrl('東京ドーム 日本','名古屋駅'));
  assert.equal(url.origin,'https://www.google.com');

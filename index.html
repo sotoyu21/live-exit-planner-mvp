@@ -92,9 +92,9 @@
             <label>
               <span>歩く速さ</span>
               <select id="walking">
-                <option value="normal">ふつう</option>
-                <option value="slow">ゆっくり</option>
-                <option value="fast">速め</option>
+                <option value="normal">通常の歩行（基準は未実測）</option>
+                <option value="slow">ゆっくり・不安がある（時間を加算）</option>
+                <option value="fast">速め（計算上は短縮しません）</option>
               </select>
             </label>
             <label>
@@ -106,7 +106,7 @@
             </label>
           </div>
           <label>
-            <span>会場から徒歩で向かう乗車駅</span>
+            <span>会場から徒歩で向かう乗車駅（現在の対応駅のみ）</span>
             <select id="station" required></select>
           </label>
           <div class="two-column">
@@ -156,7 +156,7 @@
       </div>
     </dialog>
 
-    <script type="module" src="app.js?v=0.4.2"></script>
+    <script type="module" src="app.js?v=0.4.3"></script>
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => navigator.serviceWorker
